@@ -111,7 +111,7 @@ header p {
     font-size: 0.875rem;
     line-height: 1.55;
     opacity: 0;
-    animation: fly 45s linear forwards;
+    animation: fly 200s linear forwards;
     z-index: 2;
 }
 

@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Stagger animations with random delays
         plaque.style.animationDelay = `${Math.random() * 5}s`;
-        plaque.style.animationDuration = `${20 + Math.random() * 10}s`; // Vary speed
+        plaque.style.animationDuration = `${120 + Math.random() * 80}s`; // Very slow movement
 
         plaque.addEventListener('click', () => {
             window.open(item.url, '_blank');
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (plaque.parentNode) {
                 plaque.remove();
             }
-        }, 30000); // Remove after 30 seconds
+        }, 240000); // Remove after 4 minutes
 
         currentIndex++;
     }
@@ -88,12 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh news every 5 minutes
     setInterval(fetchNews, 300000);
 
-    // Add new plaques every 8-15 seconds (slower)
+    // Add new plaques every 30-60 seconds (much slower)
     setInterval(() => {
         if (newsItems.length > 0) {
             displayNextNews();
         }
-    }, 8000 + Math.random() * 7000);
+    }, 30000 + Math.random() * 30000);
 
     // Add loading indicator
     const loadingIndicator = document.createElement('div');
