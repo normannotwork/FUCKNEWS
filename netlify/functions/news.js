@@ -63,13 +63,13 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Shuffle and limit to 3 news for testing
-    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 3);
-    console.log(`Processing ${shuffledNews.length} news items with AI...`);
+    // Shuffle and limit to 1 news item to avoid timeout
+    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 1);
+    console.log(`Processing ${shuffledNews.length} news item with AI...`);
 
-    // Process news with AI (limit concurrency to avoid rate limits)
+    // Process news with AI
     const processedNews = [];
-    console.log(`Starting sequential processing of ${shuffledNews.length} news items...`);
+    console.log(`Starting processing of ${shuffledNews.length} news item...`);
 
     for (let i = 0; i < shuffledNews.length; i++) {
       const newsItem = shuffledNews[i];
@@ -119,8 +119,8 @@ async function processNewsWithAI(newsItem) {
   try {
     console.log(`Processing news: ${newsItem.title.substring(0, 50)}...`);
 
-    // Увеличенная задержка для избежания rate limiting
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Reduced delay to avoid timeout
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const IOINTELLIGENCE_API_KEY = process.env.IOINTELLIGENCE_API_KEY;
     if (!IOINTELLIGENCE_API_KEY) {
@@ -136,12 +136,12 @@ async function processNewsWithAI(newsItem) {
       messages: [
         {
           role: 'system',
-          content: `Ты — мастер иронии и издевки. Создавай остроумные, ироничные комментарии, наполненные рофлом и неискренностью к новостям. Отвечай ТОЛЬКО комментарием. Максимум 2-3 предложения.`
+          content: `Ты — мастер иронии и издевки. Создавай остроумные, ироничные комментарии, наполненные рофлом и неискренностью к новостям. Отвечай ТОЛЬКО комментарием. Максимум 1-2 предложения.`
         },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.9,
-      max_tokens: 150,
+      temperature: 0.8,
+      max_tokens: 100,
       stream: false
     };
 
@@ -152,7 +152,7 @@ async function processNewsWithAI(newsItem) {
         'Authorization': `Bearer ${IOINTELLIGENCE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      timeout: 45000, // 45 second timeout
+      timeout: 25000, // 25 second timeout to avoid Netlify function timeout
     });
 
     console.log('AI response received, status:', response.status);

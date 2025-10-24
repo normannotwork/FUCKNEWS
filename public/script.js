@@ -122,7 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Hide loading after fetch completes or timeout
-    fetchNews().then(hideLoading);
-    setTimeout(hideLoading, 10000); // Fallback timeout
+    // Keep loading visible until first news appears on screen
+    fetchNews().then(() => {
+        // Wait a bit for the first plaque to appear before hiding loading
+        setTimeout(hideLoading, 2000);
+    });
+    setTimeout(hideLoading, 30000); // Fallback timeout after 30 seconds
 });
