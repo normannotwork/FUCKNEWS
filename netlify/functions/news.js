@@ -63,8 +63,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Shuffle and limit to 10 news for better performance
-    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 10);
+    // Shuffle and limit to 3 news for testing
+    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 3);
     console.log(`Processing ${shuffledNews.length} news items with AI...`);
 
     // Process news with AI (limit concurrency to avoid rate limits)
@@ -119,8 +119,8 @@ async function processNewsWithAI(newsItem) {
   try {
     console.log(`Processing news: ${newsItem.title.substring(0, 50)}...`);
 
-    // Задержка для избежания rate limiting
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Увеличенная задержка для избежания rate limiting
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const IOINTELLIGENCE_API_KEY = process.env.IOINTELLIGENCE_API_KEY;
     if (!IOINTELLIGENCE_API_KEY) {
@@ -145,14 +145,14 @@ async function processNewsWithAI(newsItem) {
       stream: false
     };
 
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    // console.log('Request body:', JSON.stringify(requestBody, null, 2)); // Commented out for production
 
     const response = await axios.post('https://api.intelligence.io.solutions/api/v1/chat/completions', requestBody, {
       headers: {
         'Authorization': `Bearer ${IOINTELLIGENCE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      timeout: 30000, // 30 second timeout
+      timeout: 45000, // 45 second timeout
     });
 
     console.log('AI response received, status:', response.status);
@@ -163,7 +163,7 @@ async function processNewsWithAI(newsItem) {
       throw new Error('No response data from AI API');
     }
 
-    console.log('Full response data:', JSON.stringify(response.data, null, 2));
+    // console.log('Full response data:', JSON.stringify(response.data, null, 2)); // Commented out for production
 
     if (!response.data.choices || !Array.isArray(response.data.choices) || response.data.choices.length === 0) {
       console.error('Invalid AI response structure - no choices');
@@ -189,7 +189,7 @@ async function processNewsWithAI(newsItem) {
       summary = 'Не удалось сгенерировать комментарий';
     }
 
-    console.log(`AI summary generated: ${summary.substring(0, 50)}...`);
+    console.log(`AI summary generated (${summary.length} chars)`);
 
     return {
       title: newsItem.title,
