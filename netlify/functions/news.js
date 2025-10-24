@@ -69,21 +69,29 @@ exports.handler = async (event, context) => {
 
     // Process news with AI (limit concurrency to avoid rate limits)
     const processedNews = [];
-    for (const newsItem of shuffledNews) {
+    console.log(`Starting sequential processing of ${shuffledNews.length} news items...`);
+
+    for (let i = 0; i < shuffledNews.length; i++) {
+      const newsItem = shuffledNews[i];
+      console.log(`Processing item ${i + 1}/${shuffledNews.length}: ${newsItem.title.substring(0, 30)}...`);
+
       try {
         const processed = await processNewsWithAI(newsItem);
         processedNews.push(processed);
+        console.log(`✓ Item ${i + 1} processed successfully`);
       } catch (error) {
-        console.error('Failed to process news item:', error);
+        console.error(`✗ Failed to process item ${i + 1}:`, error.message);
         processedNews.push({
           title: newsItem.title,
-          summary: 'Ошибка обработки новости',
+          summary: `Ошибка обработки: ${error.message}`,
           url: newsItem.url,
         });
       }
     }
-    console.log('AI processing completed');
 
+    console.log(`AI processing completed. Processed ${processedNews.length} items`);
+
+    console.log(`Returning ${processedNews.length} processed news items`);
     return {
       statusCode: 200,
       headers,
@@ -91,10 +99,15 @@ exports.handler = async (event, context) => {
     };
   } catch (error) {
     console.error('Main error:', error);
+    console.error('Error stack:', error.stack);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Внутренняя ошибка сервера', details: error.message }),
+      body: JSON.stringify({
+        error: 'Внутренняя ошибка сервера',
+        details: error.message,
+        timestamp: new Date().toISOString()
+      }),
     };
   }
 };
@@ -118,27 +131,23 @@ async function processNewsWithAI(newsItem) {
     console.log('Making AI request...');
     const MODEL = 'openai/gpt-oss-120b';
 
-    const response = await axios.post('https://api.intelligence.io.solutions/api/v1/chat/completions', {
+    const requestBody = {
       model: MODEL,
       messages: [
         {
           role: 'system',
-          content: `Ты — профессиональный стендап-комик и сатирик. Твоя задача - создавать остроумные, ироничные комментарии к новостям в стиле лучших комиков. Используй:
-
-1. ИРОНИЮ - говори одно, подразумевай другое
-2. САРКАЗМ - едкие замечания с подтекстом
-3. ПАРАДОКСЫ - неожиданные повороты мысли
-4. СРАВНЕНИЯ - смешные аналогии с повседневной жизнью
-5. ПЕРЕФРАЗИРОВАНИЕ - переверни новость с ног на голову
-
-Будь очень остроумным, современным и смешным. Отвечай ТОЛЬКО комментарием к новости. Максимум 2-3 предложения. Никаких заголовков, markdown или лишних слов.`
+          content: `Ты — профессиональный стендап-комик и сатирик. Создавай остроумные, ироничные комментарии к новостям. Будь очень смешным и современным. Отвечай ТОЛЬКО комментарием. Максимум 2-3 предложения.`
         },
         { role: 'user', content: prompt },
       ],
       temperature: 0.9,
       max_tokens: 150,
       stream: false
-    }, {
+    };
+
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+    const response = await axios.post('https://api.intelligence.io.solutions/api/v1/chat/completions', requestBody, {
       headers: {
         'Authorization': `Bearer ${IOINTELLIGENCE_API_KEY}`,
         'Content-Type': 'application/json',
@@ -146,11 +155,25 @@ async function processNewsWithAI(newsItem) {
       timeout: 30000, // 30 second timeout
     });
 
-    console.log('AI response received');
+    console.log('AI response received, status:', response.status);
+    console.log('Response data keys:', Object.keys(response.data || {}));
 
-    if (!response.data || !response.data.choices || !response.data.choices[0]) {
-      console.error('Invalid AI response structure:', response.data);
-      throw new Error('Invalid AI response structure');
+    if (!response.data) {
+      console.error('No response data from AI API');
+      throw new Error('No response data from AI API');
+    }
+
+    console.log('Full response data:', JSON.stringify(response.data, null, 2));
+
+    if (!response.data.choices || !Array.isArray(response.data.choices) || response.data.choices.length === 0) {
+      console.error('Invalid AI response structure - no choices');
+      throw new Error('Invalid AI response structure - no choices');
+    }
+
+    if (!response.data.choices[0].message || !response.data.choices[0].message.content) {
+      console.error('Invalid AI response structure - no message content');
+      console.error('Choice 0:', response.data.choices[0]);
+      throw new Error('Invalid AI response structure - no message content');
     }
 
     let summary = response.data.choices[0].message.content?.trim() || '';
