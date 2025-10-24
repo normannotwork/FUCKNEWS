@@ -96,31 +96,35 @@ header p {
     position: absolute;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.375rem;
-    box-shadow: 
-        0 6px 16px var(--shadow-md),
-        0 2px 6px var(--shadow-sm);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow:
+        0 8px 24px var(--shadow-md),
+        0 3px 8px var(--shadow-sm);
     cursor: pointer;
-    transition: 
-        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        box-shadow 0.3s ease,
-        border-color 0.3s ease;
-    max-width: 320px;
+    transition:
+        transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        box-shadow 0.4s ease,
+        border-color 0.4s ease;
+    max-width: 340px;
     word-wrap: break-word;
-    font-size: 0.875rem;
-    line-height: 1.55;
+    font-size: 0.9rem;
+    line-height: 1.6;
     opacity: 0;
     animation: fly 200s linear forwards;
     z-index: 2;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .news-plaque:hover {
-    transform: translateY(-6px) scale(1.015);
-    box-shadow: 
-        0 12px 28px var(--shadow-lg),
-        0 4px 8px var(--shadow-md);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow:
+        0 16px 40px var(--shadow-lg),
+        0 6px 12px var(--shadow-md);
     border-color: var(--accent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .news-plaque.failed {
@@ -149,29 +153,30 @@ header p {
 
 @keyframes fly {
     0% {
-        transform: translateX(-100vw) translateY(0);
+        transform: translateX(-60vw) translateY(0) rotate(0deg);
         opacity: 0;
     }
     5% {
         opacity: 1;
     }
     15% {
-        transform: translateX(10vw) translateY(-20vh);
+        transform: translateX(5vw) translateY(-15vh) rotate(2deg);
     }
     35% {
-        transform: translateX(35vw) translateY(10vh);
+        transform: translateX(25vw) translateY(8vh) rotate(-1deg);
     }
     55% {
-        transform: translateX(60vw) translateY(-15vh);
+        transform: translateX(45vw) translateY(-12vh) rotate(1deg);
     }
     75% {
-        transform: translateX(85vw) translateY(5vh);
+        transform: translateX(65vw) translateY(3vh) rotate(-0.5deg);
     }
     90% {
         opacity: 1;
+        transform: translateX(85vw) translateY(0) rotate(0deg);
     }
     100% {
-        transform: translateX(200vw) translateY(0);
+        transform: translateX(130vw) translateY(0) rotate(0deg);
         opacity: 0;
     }
 }
@@ -207,13 +212,15 @@ footer p {
     text-align: center;
     z-index: 1000;
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    padding: 2.25rem 2rem;
-    border-radius: 20px;
-    box-shadow: 
-        0 10px 30px var(--shadow-lg),
-        0 4px 12px var(--shadow-md);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 2.5rem 2.5rem;
+    border-radius: 24px;
+    box-shadow:
+        0 12px 36px var(--shadow-lg),
+        0 6px 16px var(--shadow-md);
     border: 1px solid var(--border);
+    transition: opacity 0.5s ease;
 }
 
 #loading p {
@@ -238,10 +245,12 @@ footer p {
     }
 
     .news-plaque {
-        max-width: 270px;
-        padding: 1.125rem;
-        font-size: 0.875rem;
-        border-radius: 16px;
+        max-width: 280px;
+        padding: 1.25rem;
+        font-size: 0.9rem;
+        border-radius: 18px;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     footer {
@@ -254,7 +263,25 @@ footer p {
     }
 
     #loading {
-        padding: 1.75rem 1.5rem;
-        border-radius: 18px;
+        padding: 2rem 1.75rem;
+        border-radius: 20px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
     }
+}
+
+/* Spinner animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

@@ -6,10 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchNews() {
         try {
             const response = await fetch('/.netlify/functions/news');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const news = await response.json();
-            newsItems = news;
-            currentIndex = 0;
-            displayNextNews();
+            if (news && news.length > 0) {
+                newsItems = news;
+                currentIndex = 0;
+                displayNextNews();
+            } else {
+                throw new Error('No news data received');
+            }
         } catch (error) {
             console.error('Error fetching news:', error);
             showErrorPlaque();
@@ -42,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         plaque.innerHTML = `<h3>${item.title}</h3><p>${item.summary}</p>`;
 
-        // Random starting position
-        plaque.style.left = `${Math.random() * 80}vw`;
-        plaque.style.top = `${Math.random() * 80}vh`;
+        // Random starting position (kept within bounds for visibility)
+        plaque.style.left = `${Math.random() * 50}vw`;
+        plaque.style.top = `${Math.random() * 50}vh`;
 
         // Stagger animations with random delays
         plaque.style.animationDelay = `${Math.random() * 5}s`;
@@ -52,11 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         plaque.addEventListener('click', () => {
             window.open(item.url, '_blank');
-            // Add click effect
-            plaque.style.transform = 'scale(0.95)';
+            // Add click effect with smooth animation
+            plaque.style.transform = 'scale(0.95) translateY(-2px)';
+            plaque.style.boxShadow = '0 4px 12px var(--shadow-md), 0 2px 4px var(--shadow-sm)';
             setTimeout(() => {
                 plaque.style.transform = '';
-            }, 150);
+                plaque.style.boxShadow = '';
+            }, 200);
         });
 
         // Add mouse enter/leave effects
@@ -98,24 +107,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.id = 'loading';
-    loadingIndicator.innerHTML = '<div class="spinner"></div><p>Загружаем сатиру...</p>';
-    loadingIndicator.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        color: white;
-        z-index: 1000;
-        font-family: 'Inter', sans-serif;
-    `;
+    loadingIndicator.innerHTML = '<div class="spinner"></div><p>Загружаем новости...</p>';
     document.body.appendChild(loadingIndicator);
 
     // Hide loading after first news load
-    setTimeout(() => {
-        loadingIndicator.style.opacity = '0';
-        setTimeout(() => {
-            loadingIndicator.style.display = 'none';
-        }, 500);
-    }, 3000);
+    let loadingHidden = false;
+    const hideLoading = () => {
+        if (!loadingHidden) {
+            loadingHidden = true;
+            loadingIndicator.style.opacity = '0';
+            setTimeout(() => {
+                loadingIndicator.style.display = 'none';
+            }, 500);
+        }
+    };
+
+    // Hide loading after fetch completes or timeout
+    fetchNews().then(hideLoading);
+    setTimeout(hideLoading, 10000); // Fallback timeout
 });
