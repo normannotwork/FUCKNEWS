@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         plaque.style.top = '50%';
         plaque.style.transform = 'translate(-50%, -50%)';
         plaque.style.animation = 'none';
+        plaque.style.zIndex = '200';
         container.appendChild(plaque);
     }
 
@@ -37,11 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const item = newsItems[currentIndex];
         const plaque = document.createElement('div');
-        plaque.className = 'news-plaque';
+        plaque.className = `news-plaque${item.summary === 'Failed to process.' ? ' failed' : ''}`;
 
-        // Add emoji based on content sentiment (simple heuristic)
-        const emoji = getRandomEmoji();
-        plaque.innerHTML = `<h3>${emoji} ${item.title}</h3><p>${item.summary}</p>`;
+        plaque.innerHTML = `<h3>${item.title}</h3><p>${item.summary}</p>`;
 
         // Random starting position
         plaque.style.left = `${Math.random() * 80}vw`;
@@ -81,10 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentIndex++;
     }
 
-    function getRandomEmoji() {
-        const emojis = ['📰', '📢', '🎭', '🤡', '🎪', '🎨', '🎭', '🎪', '🎨', '🎭'];
-        return emojis[Math.floor(Math.random() * emojis.length)];
-    }
+    // Removed emoji function as requested
 
     // Initial load
     fetchNews();
@@ -92,12 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh news every 5 minutes
     setInterval(fetchNews, 300000);
 
-    // Add new plaques every 3-8 seconds
+    // Add new plaques every 8-15 seconds (slower)
     setInterval(() => {
         if (newsItems.length > 0) {
             displayNextNews();
         }
-    }, 3000 + Math.random() * 5000);
+    }, 8000 + Math.random() * 7000);
 
     // Add loading indicator
     const loadingIndicator = document.createElement('div');
@@ -117,6 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hide loading after first news load
     setTimeout(() => {
-        loadingIndicator.style.display = 'none';
+        loadingIndicator.style.opacity = '0';
+        setTimeout(() => {
+            loadingIndicator.style.display = 'none';
+        }, 500);
     }, 3000);
 });

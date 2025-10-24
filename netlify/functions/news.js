@@ -46,8 +46,8 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Shuffle and limit to 15 news for better performance
-    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 15);
+    // Shuffle and limit to 10 news for better performance
+    const shuffledNews = allNews.sort(() => 0.5 - Math.random()).slice(0, 10);
 
     // Process news with AI
     const processedNews = await Promise.all(shuffledNews.map(processNewsWithAI));
@@ -69,7 +69,7 @@ exports.handler = async (event, context) => {
 
 // Function to process news with AI
 async function processNewsWithAI(newsItem) {
-  const prompt = `Summarize this news in an arrogant, humorous, and uncensored way: ${newsItem.title} - ${newsItem.description}`;
+  const prompt = `Прокомментируй эту новость остроумно и сатирически: ${newsItem.title} - ${newsItem.description}`;
   try {
     // Задержка для избежания rate limiting
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -86,11 +86,11 @@ async function processNewsWithAI(newsItem) {
       messages: [
         {
           role: 'system',
-          content: `Ты — эксперт по генерации новостных сводок в надменном, юмористическом и безцензурном стиле. Отвечай ТОЛЬКО сводкой. Никаких пояснений, комментариев, markdown. Будь остроумным, саркастичным и не стесняйся в выражениях.`
+          content: `Ты — остроумный сатирик в стиле КВН или Comedy Club. Создавай смешные, едкие комментарии к новостям с использованием иронии, сарказма и парадоксов. Будь остроумным, но не злым. Используй современный юмор, отсылки к поп-культуре и неожиданные повороты. Отвечай ТОЛЬКО комментарием. Никаких заголовков, markdown или лишних слов.`
         },
         { role: 'user', content: prompt },
       ],
-      temperature: 0.7,
+      temperature: 0.8,
       max_tokens: 200,
       stream: false
     }, {
